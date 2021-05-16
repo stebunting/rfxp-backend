@@ -1,12 +1,15 @@
 package router
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
-	"net/http"
+	"log"
+	"os"
 	"strconv"
-	"strings"
+	"time"
 
+	"github.com/getsentry/sentry-go"
+	"github.com/joho/godotenv"
 	"github.com/stebunting/rfxp-backend/channel"
 	"github.com/stebunting/rfxp-backend/external/dk"
 	"github.com/stebunting/rfxp-backend/external/gb"
@@ -14,14 +17,14 @@ import (
 	"github.com/stebunting/rfxp-backend/external/se"
 )
 
-type Request struct {
-	Latitude  float64
-	Longitude float64
+type LambdaRequest struct {
+	Country   string `json:"country"`
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
 }
 
 type Response struct {
 	Status   string
-	Details  string
 	Location Location
 	Channels []channel.Channel
 }
@@ -35,26 +38,37 @@ type Api interface {
 	Call() *[]channel.Channel
 }
 
-func GetData(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func init() {
+	godotenv.Load()
+}
 
-	country, err := getCountry(r)
+func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn:         os.Getenv("SENTRY_DSN"),
+		Environment: os.Getenv("SENTRY_ENV"),
+	})
 	if err != nil {
-		handleError(w, err)
-		return
+		log.Fatalf("sentry.Init: %s", err)
+	}
+	defer sentry.Flush(2 * time.Second)
+
+	latitude, err := strconv.ParseFloat(r.Latitude, 64)
+	if err != nil {
+		return Response{}, errors.New("latitude must be a number")
+	}
+	if latitude < -180 || latitude > 180 {
+		return Response{}, errors.New("latitude must be between -180 and 180 degrees")
 	}
 
-	latitude, err := getLatitude(r)
+	longitude, err := strconv.ParseFloat(r.Longitude, 64)
 	if err != nil {
-		handleError(w, err)
-		return
+		return Response{}, errors.New("longitude must be a number")
+	}
+	if longitude < -60 || longitude > 80 {
+		return Response{}, errors.New("longitude must be between -60 and 80 degrees")
 	}
 
-	longitude, err := getLongitude(r)
-	if err != nil {
-		handleError(w, err)
-		return
-	}
+	country := r.Country
 
 	var api Api
 	switch country {
@@ -69,74 +83,16 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 	case "je", "gg":
 		api = &gb.GB{Latitude: latitude, Longitude: longitude, Code: "UTM"}
 	default:
-		handleError(w, errors.New("invalid country code"))
-		return
+		return Response{}, errors.New("invalid country code or country not implemented")
 	}
 
 	channelInfo := api.Call()
-	ret, err := json.Marshal(Response{
+	return Response{
 		Status: "OK",
 		Location: Location{
 			Latitude:  latitude,
 			Longitude: longitude,
 		},
 		Channels: *channelInfo,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(ret)
-}
-
-func handleError(w http.ResponseWriter, err error) {
-	j, err := json.Marshal(Response{
-		Status:   "Error",
-		Details:  err.Error(),
-		Channels: nil,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte(j))
-}
-
-func getCountry(r *http.Request) (string, error) {
-	country := r.URL.Query()["country"]
-	if len(country) == 0 {
-		return "", errors.New("missing country parameter")
-	}
-
-	return strings.ToLower(country[0]), nil
-}
-
-func getLatitude(r *http.Request) (float64, error) {
-	lat := r.URL.Query()["lat"]
-	if len(lat) == 0 {
-		return 0, errors.New("missing lat parameter")
-	}
-
-	latitude, err := strconv.ParseFloat(lat[0], 64)
-	if err != nil {
-		return 0, errors.New("invalid lat")
-	}
-
-	return latitude, nil
-}
-
-func getLongitude(r *http.Request) (float64, error) {
-	lng := r.URL.Query()["lng"]
-	if len(lng) == 0 {
-		return 0, errors.New("missing lng parameter")
-	}
-
-	longitude, err := strconv.ParseFloat(lng[0], 64)
-	if err != nil {
-		return 0, errors.New("invalid lng")
-	}
-
-	return longitude, nil
+	}, nil
 }

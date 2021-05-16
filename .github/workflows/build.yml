@@ -16,11 +16,35 @@ jobs:
       with:
         go-version: 1.15
 
-    - name: Build
-      run: go build -v ./...
+    - name: Create dotenv
+      run: touch .env
 
     - name: Test
       run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
     - name: Code Coverage
       run: bash <(curl -s https://codecov.io/bash)
+    
+    - name: Make bin direcotry
+      run: mkdir bin
+
+    - name: Build
+      run: env GOOS=linux GOARCH=amd64 go build -o bin/whitespace-lookup ./cmd/rfxp-backend
+    
+    - name: Zip Source Files
+      run: zip -r bin/whitespace-lookup.zip cmd/ channel/ coordinates/ external/ router/ .env
+    
+    - name: Zip Build
+      run: zip -j bin/whitespace-lookup.zip bin/whitespace-lookup
+    
+    - name: Configure AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-2
+      
+    - name: Deploy to Lambda
+      run: |
+        aws lambda update-function-code --region eu-west-2 --function-name whitespace-lookup --zip-file fileb://bin/whitespace-lookup.zip --publish
+
