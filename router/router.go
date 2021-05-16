@@ -24,14 +24,14 @@ type LambdaRequest struct {
 }
 
 type Response struct {
-	Status   string
-	Location Location
-	Channels []channel.Channel
+	Status   string            `json:"status"`
+	Location Location          `json:"location"`
+	Channels []channel.Channel `json:"channels"`
 }
 
 type Location struct {
-	Latitude  float64
-	Longitude float64
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 type Api interface {
