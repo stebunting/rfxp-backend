@@ -14,6 +14,7 @@ import (
 	"github.com/stebunting/rfxp-backend/external/dk"
 	"github.com/stebunting/rfxp-backend/external/gb"
 	"github.com/stebunting/rfxp-backend/external/nl"
+	"github.com/stebunting/rfxp-backend/external/no"
 	"github.com/stebunting/rfxp-backend/external/se"
 )
 
@@ -76,6 +77,8 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 		api = &se.Sweden{Latitude: latitude, Longitude: longitude}
 	case "dk":
 		api = &dk.Denmark{Latitude: latitude, Longitude: longitude}
+	case "no":
+		api = &no.Norway{Latitude: latitude, Longitude: longitude}
 	case "nl":
 		api = &nl.Netherlands{Latitude: latitude, Longitude: longitude}
 	case "gb", "im":
