@@ -2,11 +2,13 @@ package dk
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/stebunting/rfxp-backend/channel"
 )
 
@@ -30,14 +32,18 @@ type Results struct {
 }
 
 func (s *Denmark) Call() *[]channel.Channel {
-	result := s.makeApiCall()
+	result, err := s.makeApiCall()
+	if err != nil {
+		return nil
+	}
 	channels := s.channelsFromApiResponse(result)
 	return channels
 }
 
-func (s *Denmark) makeApiCall() *[][]int {
+func (s *Denmark) makeApiCall() (*[][]int, error) {
 	url, err := url.Parse("https://frekvens.ens.dk/findKanalerAPI.php")
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 
@@ -50,6 +56,7 @@ func (s *Denmark) makeApiCall() *[][]int {
 
 	request, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	request.Header.Set("Accept", "application/json")
@@ -57,11 +64,13 @@ func (s *Denmark) makeApiCall() *[][]int {
 	client := &http.Client{}
 	rawResponse, err := client.Do(request)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 
 	body, err := ioutil.ReadAll(rawResponse.Body)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	defer rawResponse.Body.Close()
@@ -69,14 +78,16 @@ func (s *Denmark) makeApiCall() *[][]int {
 	var response ApiResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 
 	if response.Status != "OK" {
-		panic(err)
+		sentry.CaptureMessage(response.Status)
+		return nil, errors.New(response.Status)
 	}
 
-	return &response.Results[0].TvChannelsNoGuardBand
+	return &response.Results[0].TvChannelsNoGuardBand, nil
 }
 
 func (s *Denmark) channelsFromApiResponse(result *[][]int) *[]channel.Channel {

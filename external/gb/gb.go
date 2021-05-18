@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/getsentry/sentry-go"
 	"github.com/stebunting/rfxp-backend/channel"
 	"github.com/stebunting/rfxp-backend/coordinates"
 )
@@ -30,15 +31,18 @@ func (s *GB) Call() *[]channel.Channel {
 
 	err := s.initSession()
 	if err != nil {
-		// HANDLE ERROR
+		sentry.CaptureException(err)
+		return &[]channel.Channel{}
 	}
 	err = s.getLocationList()
 	if err != nil {
-		// HANDLE ERROR
+		sentry.CaptureException(err)
+		return &[]channel.Channel{}
 	}
 	channels, err := s.getData()
 	if err != nil {
-		// HANDLE ERROR
+		sentry.CaptureException(err)
+		return &[]channel.Channel{}
 	}
 
 	return channels
@@ -169,6 +173,7 @@ func (s *GB) getData() (*[]channel.Channel, error) {
 func (s *GB) getDocument() (*goquery.Document, error) {
 	request, err := http.NewRequest(http.MethodPost, s.url.String(), strings.NewReader(s.form.Encode()))
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -180,6 +185,7 @@ func (s *GB) getDocument() (*goquery.Document, error) {
 
 	document, err := goquery.NewDocumentFromReader(rawResponse.Body)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	defer rawResponse.Body.Close()

@@ -2,6 +2,7 @@ package se
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/stebunting/rfxp-backend/channel"
 )
 
@@ -53,16 +55,17 @@ type FrequencyBundleInfo struct {
 func (s *Sweden) Call() *[]channel.Channel {
 	var indoors *[]FrequencyBundleInfo
 	var outdoors *[]FrequencyBundleInfo
+	sentry.CaptureMessage("Message from SE")
 
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
-		indoors = s.makeApiCall(true)
+		indoors, _ = s.makeApiCall(true)
 	}(&wg)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
-		outdoors = s.makeApiCall(false)
+		outdoors, _ = s.makeApiCall(false)
 	}(&wg)
 	wg.Wait()
 
@@ -71,9 +74,10 @@ func (s *Sweden) Call() *[]channel.Channel {
 	return channels
 }
 
-func (s *Sweden) makeApiCall(indoors bool) *[]FrequencyBundleInfo {
+func (s *Sweden) makeApiCall(indoors bool) (*[]FrequencyBundleInfo, error) {
 	url, err := url.Parse("https://wirelessaudio.pts.se/api/WirelessAudioTransmission/CheckLocation")
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 
@@ -88,6 +92,7 @@ func (s *Sweden) makeApiCall(indoors bool) *[]FrequencyBundleInfo {
 
 	request, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	request.Header.Set("Accept", "application/json")
@@ -100,6 +105,7 @@ func (s *Sweden) makeApiCall(indoors bool) *[]FrequencyBundleInfo {
 
 	body, err := ioutil.ReadAll(rawResponse.Body)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	defer rawResponse.Body.Close()
@@ -111,10 +117,11 @@ func (s *Sweden) makeApiCall(indoors bool) *[]FrequencyBundleInfo {
 	}
 
 	if !response.Success {
-		panic(err)
+		sentry.CaptureMessage(response.ErrorMessage)
+		return nil, errors.New(response.ErrorMessage)
 	}
 
-	return &response.FrequencyBundles
+	return &response.FrequencyBundles, nil
 }
 
 func (s *Sweden) channelsFromApiResponse(

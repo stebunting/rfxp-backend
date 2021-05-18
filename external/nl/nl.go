@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/stebunting/rfxp-backend/channel"
 	"github.com/stebunting/rfxp-backend/coordinates"
 )
@@ -23,6 +24,7 @@ func (s *Netherlands) Call() *[]channel.Channel {
 
 	channels, err := s.makeApiCall(gridReference.GetEasting(), gridReference.GetNorthing())
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 
@@ -32,6 +34,7 @@ func (s *Netherlands) Call() *[]channel.Channel {
 func (s *Netherlands) makeApiCall(easting float64, northing float64) (*[]channel.Channel, error) {
 	response, err := http.Get("https://www.microfoonbanden.nl/images/inputData.png")
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	defer response.Body.Close()
@@ -39,6 +42,7 @@ func (s *Netherlands) makeApiCall(easting float64, northing float64) (*[]channel
 	reader := ioutil.NopCloser(response.Body)
 	img, _, err := image.Decode(reader)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 
