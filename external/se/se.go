@@ -52,7 +52,7 @@ type FrequencyBundleInfo struct {
 	LastChannel   int
 }
 
-func (s *Sweden) Call() *[]channel.Channel {
+func (s *Sweden) Call() (*[]channel.Channel, error) {
 	var indoors *[]FrequencyBundleInfo
 	var outdoors *[]FrequencyBundleInfo
 	sentry.CaptureMessage("Message from SE")
@@ -71,7 +71,7 @@ func (s *Sweden) Call() *[]channel.Channel {
 
 	channels := s.channelsFromApiResponse(indoors, outdoors)
 
-	return channels
+	return channels, nil
 }
 
 func (s *Sweden) makeApiCall(indoors bool) (*[]FrequencyBundleInfo, error) {

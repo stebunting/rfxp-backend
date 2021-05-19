@@ -18,17 +18,16 @@ type Netherlands struct {
 	Longitude float64
 }
 
-func (s *Netherlands) Call() *[]channel.Channel {
+func (s *Netherlands) Call() (*[]channel.Channel, error) {
 	lookup := coordinates.New(s.Latitude, s.Longitude)
 	gridReference, _ := lookup.GetGridReference("NL")
 
 	channels, err := s.makeApiCall(gridReference.GetEasting(), gridReference.GetNorthing())
 	if err != nil {
-		sentry.CaptureException(err)
-		panic(err)
+		return nil, err
 	}
 
-	return channels
+	return channels, nil
 }
 
 func (s *Netherlands) makeApiCall(easting float64, northing float64) (*[]channel.Channel, error) {

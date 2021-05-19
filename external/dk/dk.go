@@ -31,13 +31,13 @@ type Results struct {
 	TvChannelsNoGuardBand [][]int `json:"tvChannelsNoGuardBand"`
 }
 
-func (s *Denmark) Call() *[]channel.Channel {
+func (s *Denmark) Call() (*[]channel.Channel, error) {
 	result, err := s.makeApiCall()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	channels := s.channelsFromApiResponse(result)
-	return channels
+	return channels, nil
 }
 
 func (s *Denmark) makeApiCall() (*[][]int, error) {

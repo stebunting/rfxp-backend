@@ -7,7 +7,7 @@ import (
 	"github.com/stebunting/rfxp-backend/external/no"
 )
 
-func TestNo(t *testing.T) {
+func TestValidNo(t *testing.T) {
 	type TestChannel struct {
 		Channel  int
 		Indoors  bool
@@ -167,7 +167,11 @@ func TestNo(t *testing.T) {
 
 	for _, test := range testCases {
 		s := no.Norway{Latitude: test.Latitude, Longitude: test.Longitude}
-		channels := *(s.Call())
+		c, err := s.Call()
+		if err != nil {
+			log.Fatalf("unexpected error making network call")
+		}
+		channels := *c
 
 		for i := 0; i < len(channels); i++ {
 			if channels[i].Number != test.Channels[i].Channel {

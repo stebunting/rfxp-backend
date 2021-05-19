@@ -24,33 +24,35 @@ type GB struct {
 	form      url.Values
 }
 
-func (s *GB) Call() *[]channel.Channel {
+func (s *GB) Call() (*[]channel.Channel, error) {
 	lookup := coordinates.New(s.Latitude, s.Longitude)
 	gridReference, _ := lookup.GetGridReference(s.Code)
+
+	if len(gridReference.GetShortCode()) != 8 {
+		return nil, errors.New("location has no GB grid reference")
+	}
 	s.setupClient(gridReference.GetShortCode())
 
 	err := s.initSession()
 	if err != nil {
-		sentry.CaptureException(err)
-		return &[]channel.Channel{}
+		return nil, err
 	}
 	err = s.getLocationList()
 	if err != nil {
-		sentry.CaptureException(err)
-		return &[]channel.Channel{}
+		return nil, err
 	}
 	channels, err := s.getData()
 	if err != nil {
-		sentry.CaptureException(err)
-		return &[]channel.Channel{}
+		return nil, err
 	}
 
-	return channels
+	return channels, nil
 }
 
 func (s *GB) setupClient(code string) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 	s.client = &http.Client{
@@ -59,6 +61,7 @@ func (s *GB) setupClient(code string) {
 
 	s.url, err = url.Parse("https://pmse.ofcom.org.uk/Pmse/wireless/public/microphone700.aspx")
 	if err != nil {
+		sentry.CaptureException(err)
 		panic(err)
 	}
 
@@ -80,6 +83,7 @@ func (s *GB) initSession() error {
 	var exists bool
 	viewState, exists := document.Find("#__VIEWSTATE").Attr("value")
 	if !exists {
+		sentry.CaptureMessage("no viewstate element")
 		return errors.New("no viewstate element")
 	}
 	s.form.Add("__VIEWSTATE", viewState)

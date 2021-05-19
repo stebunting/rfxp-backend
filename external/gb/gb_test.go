@@ -7,7 +7,7 @@ import (
 	"github.com/stebunting/rfxp-backend/external/gb"
 )
 
-func TestGb(t *testing.T) {
+func TestValidGb(t *testing.T) {
 	type TestChannel struct {
 		Channel  int
 		Indoors  bool
@@ -244,7 +244,11 @@ func TestGb(t *testing.T) {
 
 	for _, test := range testCases {
 		s := gb.GB{Latitude: test.Latitude, Longitude: test.Longitude, Code: test.Code}
-		channels := *(s.Call())
+		c, err := s.Call()
+		if err != nil {
+			log.Fatalf("unexpected error making network call")
+		}
+		channels := *c
 
 		for i := 0; i < len(channels); i++ {
 			if channels[i].Number != test.Channels[i].Channel {
@@ -257,5 +261,16 @@ func TestGb(t *testing.T) {
 				log.Fatalf("invalid outdoors availability in %s channel %d... expected %v, got %v", test.PlaceName, test.Channels[i].Channel, test.Channels[i].Outdoors, channels[i].Outdoors)
 			}
 		}
+	}
+}
+
+func TestInvalidGb(t *testing.T) {
+	s := gb.GB{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	_, err := s.Call()
+	if err == nil {
+		log.Fatalf("expected error making network call")
 	}
 }

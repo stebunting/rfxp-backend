@@ -36,7 +36,7 @@ type Location struct {
 }
 
 type Api interface {
-	Call() *[]channel.Channel
+	Call() (*[]channel.Channel, error)
 }
 
 func init() {
@@ -89,7 +89,17 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 		return Response{}, errors.New("invalid country code or country not implemented")
 	}
 
-	channelInfo := api.Call()
+	channelInfo, err := api.Call()
+	if err != nil {
+		return Response{
+			Status: "Error",
+			Location: Location{
+				Latitude:  latitude,
+				Longitude: longitude,
+			},
+			Channels: []channel.Channel{},
+		}, nil
+	}
 	return Response{
 		Status: "OK",
 		Location: Location{

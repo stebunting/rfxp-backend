@@ -7,7 +7,7 @@ import (
 	"github.com/stebunting/rfxp-backend/external/nl"
 )
 
-func TestNl(t *testing.T) {
+func TestValidNl(t *testing.T) {
 	type TestChannel struct {
 		Channel  int
 		Indoors  bool
@@ -167,7 +167,11 @@ func TestNl(t *testing.T) {
 
 	for _, test := range testCases {
 		s := nl.Netherlands{Latitude: test.Latitude, Longitude: test.Longitude}
-		channels := *(s.Call())
+		c, err := s.Call()
+		if err != nil {
+			log.Fatalf("unexpected error making network call")
+		}
+		channels := *c
 
 		for i := 0; i < len(channels); i++ {
 			if channels[i].Number != test.Channels[i].Channel {
@@ -183,40 +187,13 @@ func TestNl(t *testing.T) {
 	}
 }
 
-/*{
-	PlaceName: "Goteborg",
-	Latitude:  57.72218,
-	Longitude: 12.09953,
-	Channels: []TestChannel{
-		{Channel: 21, Indoors: false, Outdoors: false},
-		{Channel: 22, Indoors: false, Outdoors: false},
-		{Channel: 23, Indoors: false, Outdoors: false},
-		{Channel: 24, Indoors: false, Outdoors: false},
-		{Channel: 25, Indoors: false, Outdoors: false},
-		{Channel: 26, Indoors: false, Outdoors: false},
-		{Channel: 27, Indoors: false, Outdoors: false},
-		{Channel: 28, Indoors: false, Outdoors: false},
-		{Channel: 29, Indoors: false, Outdoors: false},
-		{Channel: 30, Indoors: false, Outdoors: false},
-		{Channel: 31, Indoors: false, Outdoors: false},
-		{Channel: 32, Indoors: false, Outdoors: false},
-		{Channel: 33, Indoors: false, Outdoors: false},
-		{Channel: 34, Indoors: false, Outdoors: false},
-		{Channel: 35, Indoors: false, Outdoors: false},
-		{Channel: 36, Indoors: false, Outdoors: false},
-		{Channel: 37, Indoors: false, Outdoors: false},
-		{Channel: 38, Indoors: false, Outdoors: false},
-		{Channel: 39, Indoors: false, Outdoors: false},
-		{Channel: 40, Indoors: false, Outdoors: false},
-		{Channel: 41, Indoors: false, Outdoors: false},
-		{Channel: 42, Indoors: false, Outdoors: false},
-		{Channel: 43, Indoors: false, Outdoors: false},
-		{Channel: 44, Indoors: false, Outdoors: false},
-		{Channel: 45, Indoors: false, Outdoors: false},
-		{Channel: 46, Indoors: false, Outdoors: false},
-		{Channel: 47, Indoors: false, Outdoors: false},
-		{Channel: 48, Indoors: false, Outdoors: false},
-		{Channel: 49, Indoors: false, Outdoors: false},
-	},
+func TestInvalidNl(t *testing.T) {
+	s := nl.Netherlands{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	_, err := s.Call()
+	if err == nil {
+		log.Fatalf("expected error making network call")
+	}
 }
-*/

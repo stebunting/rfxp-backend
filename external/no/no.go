@@ -29,13 +29,13 @@ type Result struct {
 	Warning         bool    `json:"warning"`
 }
 
-func (s *Norway) Call() *[]channel.Channel {
+func (s *Norway) Call() (*[]channel.Channel, error) {
 	result, err := s.makeApiCall()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	channels := s.channelsFromApiResponse(result)
-	return channels
+	return channels, nil
 }
 
 func (s *Norway) makeApiCall() (*[]Result, error) {
