@@ -93,7 +93,7 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 	case "JE", "GG":
 		api = &gb.GB{Latitude: latitude, Longitude: longitude, Code: "UTM"}
 	default:
-		return Response{}, errors.New("invalid country code or country not implemented")
+		api = &unknown.Unknown{}
 	}
 
 	channelInfo, err := api.Call()
