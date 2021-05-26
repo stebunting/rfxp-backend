@@ -26,16 +26,21 @@ type LambdaRequest struct {
 
 type Response struct {
 	Status   string            `json:"status"`
-	Location Location          `json:"location"`
+	Details  Details           `json:"details"`
 	Channels []channel.Channel `json:"channels"`
 }
 
-type Location struct {
+type Details struct {
+	Country   string  `json:"country"`
+	Code      string  `json:"code"`
+	Service   string  `json:"service"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }
 
 type Api interface {
+	GetCountryName() string
+	GetServiceName() string
 	Call() (*[]channel.Channel, error)
 }
 
@@ -91,9 +96,13 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 
 	channelInfo, err := api.Call()
 	if err != nil {
+		sentry.CaptureException(err)
 		return Response{
 			Status: "Error",
-			Location: Location{
+			Details: Details{
+				Country:   api.GetCountryName(),
+				Code:      countryCode,
+				Service:   api.GetServiceName(),
 				Latitude:  latitude,
 				Longitude: longitude,
 			},
@@ -102,7 +111,10 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 	}
 	return Response{
 		Status: "OK",
-		Location: Location{
+		Details: Details{
+			Country:   api.GetCountryName(),
+			Code:      countryCode,
+			Service:   api.GetServiceName(),
 			Latitude:  latitude,
 			Longitude: longitude,
 		},

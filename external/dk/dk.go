@@ -31,6 +31,14 @@ type Results struct {
 	TvChannelsNoGuardBand [][]int `json:"tvChannelsNoGuardBand"`
 }
 
+func (s *Denmark) GetCountryName() string {
+	return "Denmark"
+}
+
+func (s *Denmark) GetServiceName() string {
+	return "Energistyrelsen"
+}
+
 func (s *Denmark) Call() (*[]channel.Channel, error) {
 	result, err := s.makeApiCall()
 	if err != nil {

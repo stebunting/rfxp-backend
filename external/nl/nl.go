@@ -18,6 +18,14 @@ type Netherlands struct {
 	Longitude float64
 }
 
+func (s *Netherlands) GetCountryName() string {
+	return "The Netherlands"
+}
+
+func (s *Netherlands) GetServiceName() string {
+	return "Microfoonbanden.nl"
+}
+
 func (s *Netherlands) Call() (*[]channel.Channel, error) {
 	lookup := coordinates.New(s.Latitude, s.Longitude)
 	gridReference, _ := lookup.GetGridReference("NL")

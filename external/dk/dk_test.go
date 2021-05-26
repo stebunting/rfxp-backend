@@ -197,3 +197,25 @@ func TestInvalidDk(t *testing.T) {
 		log.Fatalf("expected error making network call")
 	}
 }
+
+func TestName(t *testing.T) {
+	s := dk.Denmark{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	name := s.GetCountryName()
+	if name != "Denmark" {
+		log.Fatalf("got wrong country name")
+	}
+}
+
+func TestService(t *testing.T) {
+	s := dk.Denmark{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	name := s.GetServiceName()
+	if name != "Energistyrelsen" {
+		log.Fatalf("got wrong service name")
+	}
+}

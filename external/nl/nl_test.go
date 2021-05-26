@@ -197,3 +197,25 @@ func TestInvalidNl(t *testing.T) {
 		log.Fatalf("expected error making network call")
 	}
 }
+
+func TestName(t *testing.T) {
+	s := nl.Netherlands{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	name := s.GetCountryName()
+	if name != "The Netherlands" {
+		log.Fatalf("got wrong country name")
+	}
+}
+
+func TestService(t *testing.T) {
+	s := nl.Netherlands{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	name := s.GetServiceName()
+	if name != "Microfoonbanden.nl" {
+		log.Fatalf("got wrong service name")
+	}
+}

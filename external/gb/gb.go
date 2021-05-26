@@ -24,6 +24,14 @@ type GB struct {
 	form      url.Values
 }
 
+func (s *GB) GetCountryName() string {
+	return "Great Britain"
+}
+
+func (s *GB) GetServiceName() string {
+	return "OFCOM Post 700 MHz Mic/IEM Location Planner"
+}
+
 func (s *GB) Call() (*[]channel.Channel, error) {
 	lookup := coordinates.New(s.Latitude, s.Longitude)
 	gridReference, _ := lookup.GetGridReference(s.Code)

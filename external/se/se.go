@@ -52,6 +52,14 @@ type FrequencyBundleInfo struct {
 	LastChannel   int
 }
 
+func (s *Sweden) GetCountryName() string {
+	return "Sweden"
+}
+
+func (s *Sweden) GetServiceName() string {
+	return "PTS Trådlös ljudöverföring"
+}
+
 func (s *Sweden) Call() (*[]channel.Channel, error) {
 	var indoors *[]FrequencyBundleInfo
 	var outdoors *[]FrequencyBundleInfo

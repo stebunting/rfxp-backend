@@ -29,6 +29,14 @@ type Result struct {
 	Warning         bool    `json:"warning"`
 }
 
+func (s *Norway) GetCountryName() string {
+	return "Norway"
+}
+
+func (s *Norway) GetServiceName() string {
+	return "Finnsenderen.no"
+}
+
 func (s *Norway) Call() (*[]channel.Channel, error) {
 	result, err := s.makeApiCall()
 	if err != nil {

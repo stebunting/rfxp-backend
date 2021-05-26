@@ -186,3 +186,25 @@ func TestValidSe(t *testing.T) {
 		}
 	}
 }
+
+func TestName(t *testing.T) {
+	s := se.Sweden{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	name := s.GetCountryName()
+	if name != "Sweden" {
+		log.Fatalf("got wrong country name")
+	}
+}
+
+func TestService(t *testing.T) {
+	s := se.Sweden{
+		Latitude:  57.043188,
+		Longitude: 49.921598,
+	}
+	name := s.GetServiceName()
+	if name != "PTS Trådlös ljudöverföring" {
+		log.Fatalf("got wrong service name")
+	}
+}
