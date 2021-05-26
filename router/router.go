@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -16,6 +17,7 @@ import (
 	"github.com/stebunting/rfxp-backend/external/nl"
 	"github.com/stebunting/rfxp-backend/external/no"
 	"github.com/stebunting/rfxp-backend/external/se"
+	"github.com/stebunting/rfxp-backend/external/unknown"
 )
 
 type LambdaRequest struct {
@@ -74,21 +76,21 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 		return Response{}, errors.New("longitude must be between -60 and 80 degrees")
 	}
 
-	country := r.Country
+	countryCode := strings.ToUpper(r.Country)
 
 	var api Api
-	switch country {
-	case "se":
+	switch countryCode {
+	case "SE":
 		api = &se.Sweden{Latitude: latitude, Longitude: longitude}
-	case "dk":
+	case "DK":
 		api = &dk.Denmark{Latitude: latitude, Longitude: longitude}
-	case "no":
+	case "NO":
 		api = &no.Norway{Latitude: latitude, Longitude: longitude}
-	case "nl":
+	case "NL":
 		api = &nl.Netherlands{Latitude: latitude, Longitude: longitude}
-	case "gb", "im":
+	case "GB", "IM":
 		api = &gb.GB{Latitude: latitude, Longitude: longitude, Code: "GB"}
-	case "je", "gg":
+	case "JE", "GG":
 		api = &gb.GB{Latitude: latitude, Longitude: longitude, Code: "UTM"}
 	default:
 		return Response{}, errors.New("invalid country code or country not implemented")
