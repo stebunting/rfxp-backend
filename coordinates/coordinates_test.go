@@ -6,7 +6,7 @@ import (
 	"github.com/stebunting/rfxp-backend/coordinates"
 )
 
-func TestCoordinates(t *testing.T) {
+func TestGbCoordinates(t *testing.T) {
 	EastingsLowThreshold := 0.6  // metres
 	EastingsHighThreshold := 2.8 // metres
 	NorthingsThreshold := 0.1    // metres
@@ -107,6 +107,77 @@ func TestCoordinates(t *testing.T) {
 	for _, test := range testCases {
 		lookup := coordinates.New(test.Lat, test.Lng)
 		gridReference, err := lookup.GetGridReference("GB")
+		if err != nil {
+			t.Fatalf("Coordinates unexpectedly errored: %s", err.Error())
+		}
+		if gridReference.GetEasting() < test.Easting-EastingsLowThreshold || gridReference.GetEasting() > test.Easting+EastingsHighThreshold {
+			t.Fatalf("\n--- Incorrect Easting ---\n    NAME: %s\n     GOT: %f\nEXPECTED: %f", test.Name, gridReference.GetEasting(), test.Easting)
+		}
+		if gridReference.GetNorthing() < test.Northing-NorthingsThreshold || gridReference.GetNorthing() > test.Northing+NorthingsThreshold {
+			t.Fatalf("\n--- Incorrect Northing ---\n    NAME: %s\n     GOT: %f\nEXPECTED: %f", test.Name, gridReference.GetNorthing(), test.Northing)
+		}
+		if gridReference.GetCode() != test.Code {
+			t.Fatalf("\n--- Incorrect Code ---\n    NAME: %s\n     GOT: %s\nEXPECTED: %s", test.Name, gridReference.GetCode(), test.Code)
+		}
+		if gridReference.GetShortCode() != test.ShortCode {
+			t.Fatalf("\n--- Incorrect ShortCode ---\n    NAME: %s\n     GOT: %s\nEXPECTED: %s", test.Name, gridReference.GetShortCode(), test.ShortCode)
+		}
+	}
+}
+
+func TestIeCoordinates(t *testing.T) {
+	EastingsLowThreshold := 0.6  // metres
+	EastingsHighThreshold := 1.0 // metres
+	NorthingsThreshold := 0.4    // metres
+
+	type TestCases struct {
+		Name      string
+		Lat       float64
+		Lng       float64
+		Easting   float64
+		Northing  float64
+		Code      string
+		ShortCode string
+	}
+	testCases := []TestCases{
+		{
+			Name:      "Belfast",
+			Lat:       54.596048,
+			Lng:       -5.930201,
+			Easting:   333825,
+			Northing:  373948,
+			Code:      "IJ3382573948",
+			ShortCode: "IJ338739",
+		}, {
+			Name:      "Londonderry",
+			Lat:       55.007925,
+			Lng:       -7.325037,
+			Easting:   243234,
+			Northing:  418038,
+			Code:      "IC4323418037",
+			ShortCode: "IC432180",
+		}, {
+			Name:      "Enniskillen",
+			Lat:       54.138185,
+			Lng:       -7.352331,
+			Easting:   242381,
+			Northing:  321204,
+			Code:      "IH4238021204",
+			ShortCode: "IH423212",
+		}, {
+			Name:      "Ballycastle",
+			Lat:       55.202954,
+			Lng:       -6.234729,
+			Easting:   312442,
+			Northing:  440964,
+			Code:      "ID1244140964",
+			ShortCode: "ID124409",
+		},
+	}
+
+	for _, test := range testCases {
+		lookup := coordinates.New(test.Lat, test.Lng)
+		gridReference, err := lookup.GetGridReference("IE")
 		if err != nil {
 			t.Fatalf("Coordinates unexpectedly errored: %s", err.Error())
 		}

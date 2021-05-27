@@ -90,6 +90,8 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 		api = &nl.Netherlands{Latitude: latitude, Longitude: longitude}
 	case "GB", "IM":
 		api = &gb.GB{Latitude: latitude, Longitude: longitude, Code: "GB"}
+	case "NI":
+		api = &gb.GB{Latitude: latitude, Longitude: longitude, Code: "IE"}
 	case "JE", "GG":
 		api = &gb.GB{Latitude: latitude, Longitude: longitude, Code: "UTM"}
 	default:

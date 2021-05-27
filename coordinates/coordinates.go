@@ -83,6 +83,6 @@ func (s *coordinates) transform(datum datum, system string) gridReference {
 	cartesian := NewCartesian(s)
 	lat, lon, _ := cartesian.transform(datum)
 	eastingNorthing := NewEastingsNorthings(lat, lon, datum)
-	gridReference := NewGridReference(s, eastingNorthing, "GB", 1, true)
+	gridReference := NewGridReference(s, eastingNorthing, system, 1, true)
 	return gridReference
 }

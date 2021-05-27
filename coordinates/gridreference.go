@@ -289,55 +289,55 @@ func (s *gridReference) getGbCode(code string) string {
 func (s *gridReference) getIeCode(code string) string {
 	switch code {
 	case "000004":
-		return "A"
+		return "IA"
 	case "001004":
-		return "B"
+		return "IB"
 	case "002004":
-		return "C"
+		return "IC"
 	case "003004":
-		return "D"
+		return "ID"
 	case "004004":
-		return "E"
+		return "IE"
 	case "000003":
-		return "F"
+		return "IF"
 	case "001003":
-		return "G"
+		return "IG"
 	case "002003":
-		return "H"
+		return "IH"
 	case "003003":
-		return "J"
+		return "IJ"
 	case "004003":
-		return "K"
+		return "IK"
 	case "000002":
-		return "L"
+		return "IL"
 	case "001002":
-		return "M"
+		return "IM"
 	case "002002":
-		return "N"
+		return "IN"
 	case "003002":
-		return "O"
+		return "IO"
 	case "004002":
-		return "P"
+		return "IP"
 	case "000001":
-		return "Q"
+		return "IQ"
 	case "001001":
-		return "R"
+		return "IR"
 	case "002001":
-		return "S"
+		return "IS"
 	case "003001":
-		return "T"
+		return "IT"
 	case "004001":
-		return "U"
+		return "IU"
 	case "000000":
-		return "V"
+		return "IV"
 	case "001000":
-		return "W"
+		return "IW"
 	case "002000":
-		return "X"
+		return "IX"
 	case "003000":
-		return "Y"
+		return "IY"
 	case "004000":
-		return "Z"
+		return "IZ"
 	default:
 		return ""
 	}
