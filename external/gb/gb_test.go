@@ -169,7 +169,7 @@ func TestValidGb(t *testing.T) {
 			},
 		}, {
 			PlaceName: "Guernsey",
-			Code:      "UTM",
+			Code:      "GB",
 			Latitude:  49.462185,
 			Longitude: -2.540825,
 			Channels: []TestChannel{

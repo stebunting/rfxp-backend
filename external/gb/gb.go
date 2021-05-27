@@ -37,7 +37,12 @@ func (s *GB) Call() (*[]channel.Channel, error) {
 	gridReference, _ := lookup.GetGridReference(s.Code)
 
 	if len(gridReference.GetShortCode()) != 8 {
-		return nil, errors.New("location has no GB grid reference")
+		s.Code = "UTM"
+		gridReference, _ = lookup.GetGridReference(s.Code)
+
+		if len(gridReference.GetShortCode()) != 8 {
+			return nil, errors.New("location has no GB grid reference")
+		}
 	}
 	s.setupClient(gridReference.GetShortCode())
 
