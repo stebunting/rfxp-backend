@@ -100,7 +100,6 @@ func HandleLambdaEvent(ctx context.Context, r LambdaRequest) (Response, error) {
 
 	channelInfo, err := api.Call()
 	if err != nil {
-		sentry.CaptureException(err)
 		return Response{
 			Status: "Error",
 			Details: Details{
