@@ -63,7 +63,6 @@ func (s *Sweden) GetServiceName() string {
 func (s *Sweden) Call() (*[]channel.Channel, error) {
 	var indoors *[]FrequencyBundleInfo
 	var outdoors *[]FrequencyBundleInfo
-	sentry.CaptureMessage("Message from SE")
 
 	var wg sync.WaitGroup
 	wg.Add(2)
